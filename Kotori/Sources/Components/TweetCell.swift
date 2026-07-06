@@ -25,9 +25,20 @@ struct TweetCellModel: Identifiable {
     }
 }
 
+/// Where a cell sits inside a conversation module, for the thread line.
+enum ThreadPosition {
+    case single
+    case first
+    case middle
+    case last
+
+    var hasLineBelow: Bool { self == .first || self == .middle }
+}
+
 /// One timeline entry, laid out like X: avatar column, content column.
 struct TweetCell: View {
     var model: TweetCellModel
+    var thread: ThreadPosition = .single
     var onOpen: (Route) -> Void
 
     private var tweet: Tweet { model.tweet }
@@ -36,12 +47,23 @@ struct TweetCell: View {
         VStack(alignment: .leading, spacing: 2) {
             contextLine
             HStack(alignment: .top, spacing: 10) {
-                Button {
-                    onOpen(.profile(handle: tweet.author.handle))
-                } label: {
-                    AvatarView(url: tweet.author.avatarURL)
+                VStack(spacing: 3) {
+                    Button {
+                        onOpen(.profile(handle: tweet.author.handle))
+                    } label: {
+                        AvatarView(url: tweet.author.avatarURL)
+                    }
+                    .buttonStyle(.plain)
+
+                    if thread.hasLineBelow {
+                        // Connects this avatar to the next reply in the thread.
+                        Capsule()
+                            .fill(Color.kotoriSeparator)
+                            .frame(width: 2)
+                            .frame(maxHeight: .infinity)
+                            .padding(.bottom, -8)
+                    }
                 }
-                .buttonStyle(.plain)
 
                 VStack(alignment: .leading, spacing: 4) {
                     nameRow
