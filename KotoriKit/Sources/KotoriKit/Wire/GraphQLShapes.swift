@@ -141,6 +141,7 @@ struct WireTweetLegacy: Decodable {
     let extended_entities: WireExtendedEntities?
     let retweeted_status_result: WireTweetResult.WireQuotedHolder?
     let is_quote_status: Bool?
+    let possibly_sensitive: Bool?
 }
 
 struct WireEntities: Decodable {

@@ -252,7 +252,8 @@ enum Mapping {
             card: card,
             quoted: quoted.map(Tweet.Quoted.init),
             retweeted: retweeted.map(Tweet.Quoted.init),
-            isPinned: pinned
+            isPinned: pinned,
+            isSensitive: legacy.possibly_sensitive ?? false
         )
     }
 
