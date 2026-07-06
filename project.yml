@@ -1,0 +1,32 @@
+name: Kotori
+options:
+  bundleIdPrefix: dev.liteio
+  deploymentTarget:
+    iOS: "18.0"
+packages:
+  KotoriKit:
+    path: KotoriKit
+targets:
+  Kotori:
+    type: application
+    platform: iOS
+    sources:
+      - Kotori
+    dependencies:
+      - package: KotoriKit
+        product: KotoriKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.liteio.kotori
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: 1
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_CFBundleDisplayName: kotori
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentBlue
