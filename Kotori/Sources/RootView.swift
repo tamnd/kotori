@@ -1,34 +1,42 @@
 import SwiftUI
 
-/// The tab shell. One NavigationStack per tab so each keeps its own history.
+/// The tab shell. One NavigationStack per tab so each keeps its own history;
+/// the Router owns each stack's path so cells and text spans can push routes.
 struct RootView: View {
+    @State private var router = Router()
+
     var body: some View {
-        TabView {
-            Tab("Home", systemImage: "house") {
-                NavigationStack {
+        @Bindable var router = router
+        TabView(selection: $router.activeTab) {
+            Tab("Home", systemImage: "house", value: Router.Tab.home) {
+                NavigationStack(path: $router.homePath) {
                     HomeScreen()
                         .navigationDestination(for: Route.self, destination: destination)
                 }
             }
-            Tab("Search", systemImage: "magnifyingglass") {
-                NavigationStack {
+            Tab("Search", systemImage: "magnifyingglass", value: Router.Tab.search) {
+                NavigationStack(path: $router.searchPath) {
                     SearchScreen()
                         .navigationDestination(for: Route.self, destination: destination)
                 }
             }
-            Tab("Notifications", systemImage: "bell") {
-                NavigationStack {
+            Tab("Notifications", systemImage: "bell", value: Router.Tab.notifications) {
+                NavigationStack(path: $router.notificationsPath) {
                     NotificationsScreen()
                         .navigationDestination(for: Route.self, destination: destination)
                 }
             }
-            Tab("Messages", systemImage: "envelope") {
-                NavigationStack {
+            Tab("Messages", systemImage: "envelope", value: Router.Tab.messages) {
+                NavigationStack(path: $router.messagesPath) {
                     MessagesScreen()
                         .navigationDestination(for: Route.self, destination: destination)
                 }
             }
         }
+        .environment(router)
+        .environment(\.openURL, OpenURLAction { url in
+            router.handle(url) ? .handled : .systemAction
+        })
     }
 
     @ViewBuilder
@@ -37,7 +45,7 @@ struct RootView: View {
         case .tweet(let id):
             PlaceholderScreen(title: "Post", detail: "Post \(id) lands with M4.")
         case .profile(let handle):
-            PlaceholderScreen(title: "@\(handle)", detail: "Profiles land with M5.")
+            ProfileTimelineScreen(handle: handle)
         case .list(let id):
             PlaceholderScreen(title: "List", detail: "List \(id) lands with M9.")
         case .search(let query):
