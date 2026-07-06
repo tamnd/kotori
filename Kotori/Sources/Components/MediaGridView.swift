@@ -79,25 +79,20 @@ private struct MediaTile: View {
     var body: some View {
         Color.kotoriBackgroundSecondary
             .overlay {
-                AsyncImage(url: media.previewURL) { phase in
-                    if let image = phase.image {
-                        image.resizable().scaledToFill()
-                    } else {
-                        Color.kotoriBackgroundSecondary
+                if media.kind != .photo, let variant = media.bestVariant {
+                    InlineVideoView(url: variant.url)
+                } else {
+                    AsyncImage(url: media.previewURL) { phase in
+                        if let image = phase.image {
+                            image.resizable().scaledToFill()
+                        } else {
+                            Color.kotoriBackgroundSecondary
+                        }
                     }
                 }
             }
             .clipped()
             .contentShape(Rectangle())
-            .overlay(alignment: .center) {
-                if media.kind == .video {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.white)
-                        .padding(14)
-                        .background(.black.opacity(0.55), in: Circle())
-                }
-            }
             .overlay(alignment: .bottomLeading) {
                 HStack(spacing: 4) {
                     if media.kind == .video, let ms = media.durationMs {

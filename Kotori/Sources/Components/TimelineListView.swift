@@ -26,25 +26,53 @@ struct TimelineListView: View {
     }
 
     private var list: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(Array(store.items.enumerated()), id: \.offset) { index, item in
-                    cell(for: item)
-                    Divider().overlay(Color.kotoriSeparator)
-                        .onAppear {
-                            if index >= store.items.count - 5 {
-                                Task { await store.loadMore() }
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    Color.clear.frame(height: 0).id("timeline-top")
+                    ForEach(Array(store.items.enumerated()), id: \.offset) { index, item in
+                        cell(for: item)
+                        Divider().overlay(Color.kotoriSeparator)
+                            .onAppear {
+                                if index >= store.items.count - 5 {
+                                    Task { await store.loadMore() }
+                                }
                             }
-                        }
+                    }
+                    if store.isPaginating {
+                        ProgressView()
+                            .padding(.vertical, 16)
+                    }
                 }
-                if store.isPaginating {
-                    ProgressView()
-                        .padding(.vertical, 16)
+            }
+            .refreshable { await store.refresh() }
+            .background(Color.kotoriBackground)
+            .overlay(alignment: .top) {
+                if store.newPostsCount > 0 {
+                    newPostsPill(proxy: proxy)
                 }
             }
         }
-        .refreshable { await store.refresh() }
-        .background(Color.kotoriBackground)
+    }
+
+    private func newPostsPill(proxy: ScrollViewProxy) -> some View {
+        Button {
+            store.applyPendingRefresh()
+            withAnimation {
+                proxy.scrollTo("timeline-top", anchor: .top)
+            }
+        } label: {
+            Label("\(store.newPostsCount) new posts", systemImage: "arrow.up")
+                .font(.tweetMeta)
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color.kotoriAccent, in: Capsule())
+                .shadow(radius: 4, y: 2)
+        }
+        .padding(.top, 8)
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 
     @ViewBuilder
@@ -53,14 +81,23 @@ struct TimelineListView: View {
         case .tweet(let tweet):
             TweetCell(model: TweetCellModel(tweet), onOpen: onOpen)
         case .conversation(let tweets):
-            // Connected thread cells arrive with the conversation-module pass;
-            // until then each member renders as a normal cell.
-            ForEach(tweets) { tweet in
-                TweetCell(model: TweetCellModel(tweet), onOpen: onOpen)
+            // A self-thread renders as connected cells sharing one line.
+            ForEach(Array(tweets.enumerated()), id: \.element.id) { index, tweet in
+                TweetCell(
+                    model: TweetCellModel(tweet),
+                    thread: position(index, of: tweets.count),
+                    onOpen: onOpen
+                )
             }
         case .tombstone(_, let text):
             TombstoneCell(text: text)
         }
+    }
+
+    private func position(_ index: Int, of count: Int) -> ThreadPosition {
+        if count <= 1 { return .single }
+        if index == 0 { return .first }
+        return index == count - 1 ? .last : .middle
     }
 
     private var loadingState: some View {
