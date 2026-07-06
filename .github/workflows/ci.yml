@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  kit:
+    name: kit tests
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - name: Swift version
+        run: swift --version
+      - name: Test KotoriKit
+        run: swift test --package-path KotoriKit
+
+  app:
+    name: app build
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7.0.0
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build for simulator
+        run: |
+          xcodebuild -project Kotori.xcodeproj -scheme Kotori \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build
