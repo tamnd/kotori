@@ -6,6 +6,10 @@ import KotoriKit
 /// the inline player arrives with the media viewer milestone.
 struct MediaGridView: View {
     var media: [Media]
+    /// Hides the grid behind an interstitial until the viewer opts in.
+    var isSensitive: Bool = false
+
+    @State private var revealed = false
 
     private let corner: CGFloat = 12
     private let gap: CGFloat = 2
@@ -25,11 +29,40 @@ struct MediaGridView: View {
                 quad
             }
         }
+        .overlay {
+            if isSensitive && !revealed {
+                interstitial
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: corner))
         .overlay(
             RoundedRectangle(cornerRadius: corner)
                 .stroke(Color.kotoriSeparator, lineWidth: 0.5)
         )
+    }
+
+    private var interstitial: some View {
+        ZStack {
+            Rectangle().fill(.ultraThinMaterial)
+            VStack(spacing: 8) {
+                Image(systemName: "eye.slash")
+                    .font(.system(size: 22))
+                    .foregroundStyle(Color.kotoriTextSecondary)
+                Text("Sensitive content")
+                    .font(.tweetName)
+                    .foregroundStyle(Color.kotoriText)
+                Text("The author flagged this media.")
+                    .font(.tweetMeta)
+                    .foregroundStyle(Color.kotoriTextSecondary)
+                Button("Show") {
+                    revealed = true
+                }
+                .font(.tweetMeta)
+                .fontWeight(.semibold)
+                .buttonStyle(.bordered)
+            }
+            .padding(12)
+        }
     }
 
     private func single(_ m: Media) -> some View {

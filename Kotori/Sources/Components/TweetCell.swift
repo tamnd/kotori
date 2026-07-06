@@ -76,7 +76,7 @@ struct TweetCell: View {
                     nameRow
                     replyContext
                     if !tweet.text.isEmpty {
-                        TweetTextView(text: tweet.text, entities: tweet.entities, lineLimit: wantsFold ? 8 : nil)
+                        TweetTextView(text: tweet.text, entities: tweet.entities, lang: tweet.lang, lineLimit: wantsFold ? 8 : nil)
                         if wantsFold {
                             Button("Show more") {
                                 expanded = true
@@ -87,7 +87,7 @@ struct TweetCell: View {
                         }
                     }
                     if !tweet.media.isEmpty {
-                        MediaGridView(media: tweet.media)
+                        MediaGridView(media: tweet.media, isSensitive: tweet.isSensitive)
                     }
                     if let poll = tweet.poll {
                         PollView(poll: poll)
@@ -231,10 +231,10 @@ struct QuoteBox: View {
                 }
             }
             if !tweet.text.isEmpty {
-                TweetTextView(text: tweet.text, entities: tweet.entities, font: .tweetMeta, lineLimit: 6)
+                TweetTextView(text: tweet.text, entities: tweet.entities, lang: tweet.lang, font: .tweetMeta, lineLimit: 6)
             }
             if !tweet.media.isEmpty {
-                MediaGridView(media: tweet.media)
+                MediaGridView(media: tweet.media, isSensitive: tweet.isSensitive)
             }
         }
         .padding(10)
@@ -289,7 +289,8 @@ struct ActionRow: View {
             }
         }
         .foregroundStyle(Color.kotoriTextSecondary)
-        .frame(minHeight: 30)
+        .frame(minWidth: 44, minHeight: 32, alignment: .leading)
+        .contentShape(Rectangle())
     }
 }
 

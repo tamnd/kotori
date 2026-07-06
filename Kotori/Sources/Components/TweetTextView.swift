@@ -7,6 +7,8 @@ import KotoriKit
 struct TweetTextView: View {
     var text: String
     var entities: [TextEntity]
+    /// BCP 47 code from the wire; drives line breaking and hyphenation.
+    var lang: String? = nil
     var font: Font = .tweetBody
     var lineLimit: Int? = nil
 
@@ -20,6 +22,9 @@ struct TweetTextView: View {
 
     private var attributed: AttributedString {
         var result = AttributedString(text)
+        if let lang, lang != "und", lang != "qme", lang != "zxx" {
+            result.languageIdentifier = lang
+        }
         let scalars = text.unicodeScalars
         for entity in entities {
             // Entity ranges are unicode scalar offsets into the resolved text.

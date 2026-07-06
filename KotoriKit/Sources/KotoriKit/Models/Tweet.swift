@@ -95,6 +95,8 @@ public struct Tweet: Sendable, Codable, Identifiable, Hashable {
     /// Set when this entry was a repost; author is the reposter, content lives in `retweeted`.
     public var retweeted: Quoted?
     public var isPinned: Bool
+    /// The wire's possibly_sensitive flag; media hides behind an interstitial.
+    public var isSensitive: Bool
 
     /// Boxes the nested tweet so the type can contain itself.
     public struct Quoted: Sendable, Codable, Hashable {
@@ -129,7 +131,8 @@ public struct Tweet: Sendable, Codable, Identifiable, Hashable {
         card: Card? = nil,
         quoted: Quoted? = nil,
         retweeted: Quoted? = nil,
-        isPinned: Bool = false
+        isPinned: Bool = false,
+        isSensitive: Bool = false
     ) {
         self.id = id
         self.text = text
@@ -153,5 +156,6 @@ public struct Tweet: Sendable, Codable, Identifiable, Hashable {
         self.quoted = quoted
         self.retweeted = retweeted
         self.isPinned = isPinned
+        self.isSensitive = isSensitive
     }
 }
