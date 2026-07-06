@@ -7,16 +7,10 @@ struct AvatarView: View {
     var size: CGFloat = 40
 
     var body: some View {
-        AsyncImage(url: url) { phase in
-            if let image = phase.image {
-                image.resizable().scaledToFill()
-            } else {
-                Color.kotoriBackgroundSecondary
-            }
-        }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
-        .accessibilityHidden(true)
+        RemoteImage(url: url, maxPixel: 160)
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+            .accessibilityHidden(true)
     }
 }
 

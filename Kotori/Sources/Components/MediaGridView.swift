@@ -82,13 +82,7 @@ private struct MediaTile: View {
                 if media.kind != .photo, let variant = media.bestVariant {
                     InlineVideoView(url: variant.url)
                 } else {
-                    AsyncImage(url: media.previewURL) { phase in
-                        if let image = phase.image {
-                            image.resizable().scaledToFill()
-                        } else {
-                            Color.kotoriBackgroundSecondary
-                        }
-                    }
+                    RemoteImage(url: media.previewURL)
                 }
             }
             .clipped()
