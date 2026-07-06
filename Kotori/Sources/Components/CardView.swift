@@ -28,15 +28,9 @@ struct CardView: View {
 
     private var largeLayout: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AsyncImage(url: card.imageURL) { phase in
-                if let image = phase.image {
-                    image.resizable().scaledToFill()
-                } else {
-                    Color.kotoriBackgroundSecondary
-                }
-            }
-            .aspectRatio(1.91, contentMode: .fit)
-            .clipped()
+            RemoteImage(url: card.imageURL)
+                .aspectRatio(1.91, contentMode: .fit)
+                .clipped()
             textBlock
         }
     }
@@ -44,15 +38,9 @@ struct CardView: View {
     private var smallLayout: some View {
         HStack(spacing: 0) {
             if card.imageURL != nil {
-                AsyncImage(url: card.imageURL) { phase in
-                    if let image = phase.image {
-                        image.resizable().scaledToFill()
-                    } else {
-                        Color.kotoriBackgroundSecondary
-                    }
-                }
-                .frame(width: 88, height: 88)
-                .clipped()
+                RemoteImage(url: card.imageURL, maxPixel: 360)
+                    .frame(width: 88, height: 88)
+                    .clipped()
             }
             textBlock
         }
