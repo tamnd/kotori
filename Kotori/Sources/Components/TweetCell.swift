@@ -41,7 +41,14 @@ struct TweetCell: View {
     var thread: ThreadPosition = .single
     var onOpen: (Route) -> Void
 
+    @State private var expanded = false
+
     private var tweet: Tweet { model.tweet }
+
+    /// Above this the text folds behind "Show more", like X's cutoff.
+    private var wantsFold: Bool {
+        !expanded && (tweet.text.count > 500 || tweet.text.filter { $0 == "\n" }.count > 8)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -69,7 +76,15 @@ struct TweetCell: View {
                     nameRow
                     replyContext
                     if !tweet.text.isEmpty {
-                        TweetTextView(text: tweet.text, entities: tweet.entities, lineLimit: 12)
+                        TweetTextView(text: tweet.text, entities: tweet.entities, lineLimit: wantsFold ? 8 : nil)
+                        if wantsFold {
+                            Button("Show more") {
+                                expanded = true
+                            }
+                            .font(.tweetBody)
+                            .foregroundStyle(Color.kotoriAccent)
+                            .buttonStyle(.plain)
+                        }
                     }
                     if !tweet.media.isEmpty {
                         MediaGridView(media: tweet.media)
@@ -93,19 +108,29 @@ struct TweetCell: View {
         .onTapGesture {
             onOpen(.tweet(id: tweet.id))
         }
-        .contextMenu {
-            Link(destination: statusURL) {
-                Label("Open on X", systemImage: "safari")
-            }
-            ShareLink(item: statusURL) {
-                Label("Share post", systemImage: "square.and.arrow.up")
-            }
-            Button {
-                UIPasteboard.general.string = statusURL.absoluteString
-            } label: {
-                Label("Copy link", systemImage: "link")
-            }
+        .contextMenu { menuItems }
+    }
+
+    /// Shared by the long-press menu and the overflow button.
+    @ViewBuilder
+    private var menuItems: some View {
+        Link(destination: statusURL) {
+            Label("Open on X", systemImage: "safari")
         }
+        ShareLink(item: statusURL) {
+            Label("Share post", systemImage: "square.and.arrow.up")
+        }
+        Button {
+            UIPasteboard.general.string = statusURL.absoluteString
+        } label: {
+            Label("Copy link", systemImage: "link")
+        }
+        Divider()
+        // Wired to real state once accounts land (M7).
+        Button {} label: {
+            Label("Mute @\(tweet.author.handle)", systemImage: "speaker.slash")
+        }
+        .disabled(true)
     }
 
     private var statusURL: URL {
@@ -154,6 +179,15 @@ struct TweetCell: View {
                 .foregroundStyle(Color.kotoriTextSecondary)
                 .layoutPriority(1)
             Spacer(minLength: 0)
+            Menu {
+                menuItems
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.kotoriTextSecondary)
+                    .frame(width: 30, height: 22, alignment: .trailing)
+            }
+            .accessibilityLabel("More")
         }
     }
 
@@ -231,6 +265,11 @@ struct ActionRow: View {
             Spacer()
             action("chart.bar.xaxis", count: tweet.viewCount ?? 0)
             Spacer()
+            // Bookmark and share act once accounts land (M7).
+            Image(systemName: "bookmark")
+                .font(.system(size: 15))
+                .foregroundStyle(Color.kotoriTextSecondary)
+                .frame(minWidth: 30, minHeight: 30)
             Image(systemName: "square.and.arrow.up")
                 .font(.system(size: 15))
                 .foregroundStyle(Color.kotoriTextSecondary)
