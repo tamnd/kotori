@@ -254,6 +254,8 @@ struct QuoteBox: View {
 /// Write actions need the session plane (M7); until then they're inert.
 struct ActionRow: View {
     var tweet: Tweet
+    /// The focal detail row shows bare icons; counts live in labeled rows.
+    var showsCounts: Bool = true
 
     var body: some View {
         HStack {
@@ -283,7 +285,7 @@ struct ActionRow: View {
         HStack(spacing: 4) {
             Image(systemName: symbol)
                 .font(.system(size: 15))
-            if count > 0 {
+            if showsCounts, count > 0 {
                 Text(Format.count(count))
                     .font(.tweetMeta)
             }

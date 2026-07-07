@@ -46,6 +46,14 @@ struct RelativeStampTests {
         #expect(Format.relativeStamp(now.addingTimeInterval(-3 * 3600), now: now, calendar: utcCalendar) == "3h")
     }
 
+    @Test func absoluteStamp() {
+        var c = utcCalendar
+        c.timeZone = TimeZone(identifier: "UTC")!
+        let s = Format.absoluteStamp(Date(timeIntervalSince1970: 1_751_800_000), calendar: c)
+        #expect(s.contains("·"))
+        #expect(s.contains("2025"))
+    }
+
     @Test func olderFallsToDates() {
         let sameYear = Format.relativeStamp(now.addingTimeInterval(-40 * 86400), now: now, calendar: utcCalendar)
         #expect(!sameYear.contains(","))

@@ -25,10 +25,11 @@ final class Router {
         }
     }
 
-    /// Routes kotori:// URLs coming out of tweet text spans.
+    /// Routes kotori:// URLs coming out of tweet text spans, plus x.com and
+    /// twitter.com status links so tapped tweet URLs open in-app.
     /// Returns false for anything that should fall through to the system.
     func handle(_ url: URL) -> Bool {
-        guard url.scheme == "kotori" else { return false }
+        guard url.scheme == "kotori" else { return handleStatusLink(url) }
         switch url.host() {
         case "profile":
             let handle = url.lastPathComponent
@@ -44,6 +45,26 @@ final class Router {
         default:
             return false
         }
+        return true
+    }
+
+    private static let statusHosts: Set<String> = [
+        "x.com", "www.x.com", "mobile.x.com",
+        "twitter.com", "www.twitter.com", "mobile.twitter.com",
+    ]
+
+    /// Matches /<user>/status/<id> and /i/web/status/<id>, ignoring
+    /// trailing segments like /photo/1.
+    private func handleStatusLink(_ url: URL) -> Bool {
+        guard let host = url.host()?.lowercased(), Self.statusHosts.contains(host) else { return false }
+        var parts = url.path().split(separator: "/").map(String.init)
+        if parts.count >= 2, parts[0] == "i", parts[1] == "web" {
+            parts.removeFirst()
+        }
+        guard parts.count >= 3, parts[1] == "status" else { return false }
+        let id = parts[2]
+        guard !id.isEmpty, id.allSatisfy(\.isNumber) else { return false }
+        push(.tweet(id: id))
         return true
     }
 }
