@@ -43,7 +43,7 @@ struct RootView: View {
     private func destination(for route: Route) -> some View {
         switch route {
         case .tweet(let id):
-            PlaceholderScreen(title: "Post", detail: "Post \(id) lands with M4.")
+            TweetDetailScreen(id: id)
         case .profile(let handle):
             ProfileTimelineScreen(handle: handle)
         case .list(let id):

@@ -11,6 +11,15 @@ struct CardView: View {
     }
 
     var body: some View {
+        if let url = card.url {
+            Link(destination: url) { layout }
+                .buttonStyle(.plain)
+        } else {
+            layout
+        }
+    }
+
+    private var layout: some View {
         Group {
             if isLarge, card.imageURL != nil {
                 largeLayout
