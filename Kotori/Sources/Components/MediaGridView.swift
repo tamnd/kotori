@@ -2,14 +2,14 @@ import SwiftUI
 import KotoriKit
 
 /// Attached media in X's 1/2/3/4 grid layouts.
-/// Videos and gifs show their poster with a play glyph and duration pill;
-/// the inline player arrives with the media viewer milestone.
+/// Tapping a tile opens the fullscreen viewer on that attachment.
 struct MediaGridView: View {
     var media: [Media]
     /// Hides the grid behind an interstitial until the viewer opts in.
     var isSensitive: Bool = false
 
     @State private var revealed = false
+    @State private var viewer: MediaSelection?
 
     private let corner: CGFloat = 12
     private let gap: CGFloat = 2
@@ -20,9 +20,9 @@ struct MediaGridView: View {
             case 0:
                 EmptyView()
             case 1:
-                single(media[0])
+                single
             case 2:
-                pair(media[0], media[1])
+                pair
             case 3:
                 triple
             default:
@@ -39,6 +39,17 @@ struct MediaGridView: View {
             RoundedRectangle(cornerRadius: corner)
                 .stroke(Color.kotoriSeparator, lineWidth: 0.5)
         )
+        .fullScreenCover(item: $viewer) { selection in
+            MediaViewer(selection: selection)
+        }
+    }
+
+    /// One grid slot wired to open the viewer on its attachment.
+    private func tile(_ index: Int) -> some View {
+        MediaTile(media: media[index])
+            .onTapGesture {
+                viewer = MediaSelection(media: media, index: index)
+            }
     }
 
     private var interstitial: some View {
@@ -65,26 +76,26 @@ struct MediaGridView: View {
         }
     }
 
-    private func single(_ m: Media) -> some View {
+    private var single: some View {
         // Tall media gets capped near square so one photo can't fill the screen.
-        MediaTile(media: m)
-            .aspectRatio(max(m.aspectRatio, 0.75), contentMode: .fit)
+        tile(0)
+            .aspectRatio(max(media[0].aspectRatio, 0.75), contentMode: .fit)
     }
 
-    private func pair(_ a: Media, _ b: Media) -> some View {
+    private var pair: some View {
         HStack(spacing: gap) {
-            MediaTile(media: a)
-            MediaTile(media: b)
+            tile(0)
+            tile(1)
         }
         .aspectRatio(16 / 9, contentMode: .fit)
     }
 
     private var triple: some View {
         HStack(spacing: gap) {
-            MediaTile(media: media[0])
+            tile(0)
             VStack(spacing: gap) {
-                MediaTile(media: media[1])
-                MediaTile(media: media[2])
+                tile(1)
+                tile(2)
             }
         }
         .aspectRatio(16 / 9, contentMode: .fit)
@@ -93,12 +104,12 @@ struct MediaGridView: View {
     private var quad: some View {
         VStack(spacing: gap) {
             HStack(spacing: gap) {
-                MediaTile(media: media[0])
-                MediaTile(media: media[1])
+                tile(0)
+                tile(1)
             }
             HStack(spacing: gap) {
-                MediaTile(media: media[2])
-                MediaTile(media: media[3])
+                tile(2)
+                tile(3)
             }
         }
         .aspectRatio(16 / 9, contentMode: .fit)
