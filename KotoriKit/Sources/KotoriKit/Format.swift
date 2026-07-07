@@ -39,9 +39,20 @@ public enum Format {
 
         let f = DateFormatter()
         f.calendar = calendar
+        f.timeZone = calendar.timeZone
         f.locale = Locale(identifier: "en_US_POSIX")
         let sameYear = calendar.component(.year, from: date) == calendar.component(.year, from: now)
         f.dateFormat = sameYear ? "MMM d" : "MMM d, yyyy"
+        return f.string(from: date)
+    }
+
+    /// Detail-screen stamp: "9:31 AM · Jul 6, 2026".
+    public static func absoluteStamp(_ date: Date, calendar: Calendar = .current) -> String {
+        let f = DateFormatter()
+        f.calendar = calendar
+        f.timeZone = calendar.timeZone
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "h:mm a · MMM d, yyyy"
         return f.string(from: date)
     }
 
